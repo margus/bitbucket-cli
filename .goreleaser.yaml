@@ -1,6 +1,6 @@
 version: 2
 
-project_name: bb-cli
+project_name: bitbucket-cli
 
 before:
   hooks:
@@ -54,6 +54,6 @@ changelog:
 release:
   github:
     owner: margus
-    name: bb-cli
+    name: bitbucket-cli
   draft: false
   prerelease: auto

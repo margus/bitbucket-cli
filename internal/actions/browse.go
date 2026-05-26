@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/margus/bb-cli/internal/util"
+	"github.com/margus/bitbucket-cli/internal/util"
 )
 
 type Browse struct{}

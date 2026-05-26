@@ -1,3 +1,3 @@
-module github.com/margus/bb-cli
+module github.com/margus/bitbucket-cli
 
 go 1.23

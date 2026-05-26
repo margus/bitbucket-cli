@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/margus/bb-cli/internal/actions"
-	"github.com/margus/bb-cli/internal/util"
+	"github.com/margus/bitbucket-cli/internal/actions"
+	"github.com/margus/bitbucket-cli/internal/util"
 )
 
 // Build metadata. Populated via -ldflags at release time (goreleaser does

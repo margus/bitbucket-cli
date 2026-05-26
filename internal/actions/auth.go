@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/margus/bb-cli/internal/config"
-	"github.com/margus/bb-cli/internal/util"
+	"github.com/margus/bitbucket-cli/internal/config"
+	"github.com/margus/bitbucket-cli/internal/util"
 )
 
 type Auth struct{}

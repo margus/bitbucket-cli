@@ -1,9 +1,9 @@
-# bb-cli
+# bitbucket-cli
 
-[![CI](https://github.com/margus/bb-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/margus/bb-cli/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/margus/bb-cli)](https://github.com/margus/bb-cli/releases/latest)
-[![Go Reference](https://pkg.go.dev/badge/github.com/margus/bb-cli.svg)](https://pkg.go.dev/github.com/margus/bb-cli)
-[![License](https://img.shields.io/github/license/margus/bb-cli)](LICENSE)
+[![CI](https://github.com/margus/bitbucket-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/margus/bitbucket-cli/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/margus/bitbucket-cli)](https://github.com/margus/bitbucket-cli/releases/latest)
+[![Go Reference](https://pkg.go.dev/badge/github.com/margus/bitbucket-cli.svg)](https://pkg.go.dev/github.com/margus/bitbucket-cli)
+[![License](https://img.shields.io/github/license/margus/bitbucket-cli)](LICENSE)
 
 Bitbucket Cloud REST API CLI. Pure Go stdlib, single static binary.
 Config lives at `~/.config/bb/config.json` (or `$XDG_CONFIG_HOME/bb/config.json`).
@@ -14,18 +14,18 @@ Pre-built binaries (recommended):
 
 ```sh
 # macOS arm64
-curl -L -o /usr/local/bin/bb https://github.com/margus/bb-cli/releases/latest/download/bb-darwin-arm64
+curl -L -o /usr/local/bin/bb https://github.com/margus/bitbucket-cli/releases/latest/download/bb-darwin-arm64
 chmod +x /usr/local/bin/bb
 
 # Linux amd64
-curl -L -o /usr/local/bin/bb https://github.com/margus/bb-cli/releases/latest/download/bb-linux-amd64
+curl -L -o /usr/local/bin/bb https://github.com/margus/bitbucket-cli/releases/latest/download/bb-linux-amd64
 chmod +x /usr/local/bin/bb
 ```
 
 From source:
 
 ```sh
-go install github.com/margus/bb-cli/cmd/bb@latest
+go install github.com/margus/bitbucket-cli/cmd/bb@latest
 ```
 
 Or build locally:

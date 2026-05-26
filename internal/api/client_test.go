@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/margus/bb-cli/internal/config"
-	"github.com/margus/bb-cli/internal/util"
+	"github.com/margus/bitbucket-cli/internal/config"
+	"github.com/margus/bitbucket-cli/internal/util"
 )
 
 func newTestClient(handler http.Handler) (*Client, *httptest.Server) {

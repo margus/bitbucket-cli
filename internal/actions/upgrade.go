@@ -8,7 +8,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/margus/bb-cli/internal/util"
+	"github.com/margus/bitbucket-cli/internal/util"
 )
 
 type Upgrade struct {
@@ -29,7 +29,7 @@ func (u Upgrade) Dispatch(method string, args []string) error {
 }
 
 func (u Upgrade) index() error {
-	req, err := http.NewRequest("GET", "https://api.github.com/repos/bb-cli/bb-cli/releases/latest", nil)
+	req, err := http.NewRequest("GET", "https://api.github.com/repos/margus/bitbucket-cli/releases/latest", nil)
 	if err != nil {
 		return err
 	}

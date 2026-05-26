@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/margus/bb-cli/internal/api"
-	"github.com/margus/bb-cli/internal/util"
+	"github.com/margus/bitbucket-cli/internal/api"
+	"github.com/margus/bitbucket-cli/internal/util"
 )
 
 type Env struct{}
