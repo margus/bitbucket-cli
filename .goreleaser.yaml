@@ -1,0 +1,56 @@
+version: 2
+
+project_name: bb-cli
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: bb
+    main: ./cmd/bb
+    binary: bb
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+
+archives:
+  # Upload raw binaries (no .tar.gz) so `bb upgrade` can fetch them
+  # directly by filename like `bb-linux-amd64`.
+  - id: bb
+    ids: [bb]
+    formats: [binary]
+    name_template: "bb-{{ .Os }}-{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^ci:'
+      - '^chore:'
+      - '^test:'
+
+release:
+  github:
+    owner: margus
+    name: bb-cli
+  draft: false
+  prerelease: auto
