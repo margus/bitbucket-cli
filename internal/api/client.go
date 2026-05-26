@@ -14,12 +14,28 @@ import (
 	"github.com/margus/bb-cli/internal/util"
 )
 
-const baseURL = "https://api.bitbucket.org/2.0"
+// DefaultBaseURL is the production Bitbucket Cloud REST API root. Tests
+// can construct a Client with a different base via NewWithAuth.
+const DefaultBaseURL = "https://api.bitbucket.org/2.0"
 
 // Client makes authenticated Bitbucket REST requests.
 type Client struct {
-	httpc *http.Client
-	auth  *config.Auth
+	httpc   *http.Client
+	auth    *config.Auth
+	baseURL string
+}
+
+// NewWithAuth builds a Client with explicit auth and base URL. baseURL
+// may be empty, in which case DefaultBaseURL is used.
+func NewWithAuth(auth *config.Auth, baseURL string) *Client {
+	if baseURL == "" {
+		baseURL = DefaultBaseURL
+	}
+	return &Client{
+		httpc:   &http.Client{Timeout: 60 * time.Second},
+		auth:    auth,
+		baseURL: baseURL,
+	}
 }
 
 // New returns a client backed by the user's saved auth; if no auth is
@@ -35,10 +51,7 @@ func New() *Client {
 		util.O(`Run "bb auth" first.`, "yellow")
 		os.Exit(1)
 	}
-	return &Client{
-		httpc: &http.Client{Timeout: 60 * time.Second},
-		auth:  cfg.Auth,
-	}
+	return NewWithAuth(cfg.Auth, "")
 }
 
 // Request is the low-level call. If isRepoURL is true, urlPath is prefixed
@@ -62,7 +75,7 @@ func (c *Client) Request(method, urlPath string, payload any, isRepoURL bool) ([
 		body = bytes.NewReader(b)
 	}
 
-	req, err := http.NewRequest(method, baseURL+urlPath, body)
+	req, err := http.NewRequest(method, c.baseURL+urlPath, body)
 	if err != nil {
 		return nil, fmt.Errorf("building request: %w", err)
 	}

@@ -1,13 +1,38 @@
 # bb-cli
 
+[![CI](https://github.com/margus/bb-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/margus/bb-cli/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/margus/bb-cli)](https://github.com/margus/bb-cli/releases/latest)
+[![Go Reference](https://pkg.go.dev/badge/github.com/margus/bb-cli.svg)](https://pkg.go.dev/github.com/margus/bb-cli)
+[![License](https://img.shields.io/github/license/margus/bb-cli)](LICENSE)
+
 Bitbucket Cloud REST API CLI. Pure Go stdlib, single static binary.
 Config lives at `~/.config/bb/config.json` (or `$XDG_CONFIG_HOME/bb/config.json`).
 
-## Build
+## Install
+
+Pre-built binaries (recommended):
+
+```sh
+# macOS arm64
+curl -L -o /usr/local/bin/bb https://github.com/margus/bb-cli/releases/latest/download/bb-darwin-arm64
+chmod +x /usr/local/bin/bb
+
+# Linux amd64
+curl -L -o /usr/local/bin/bb https://github.com/margus/bb-cli/releases/latest/download/bb-linux-amd64
+chmod +x /usr/local/bin/bb
+```
+
+From source:
+
+```sh
+go install github.com/margus/bb-cli/cmd/bb@latest
+```
+
+Or build locally:
 
 ```sh
 make build      # produces ./bb
-make install    # `go install` to $GOPATH/bin
+make install    # go install to $GOPATH/bin
 ```
 
 Requires Go 1.23+.
@@ -92,8 +117,24 @@ Local dry run (requires `goreleaser` installed):
 goreleaser release --snapshot --clean
 ```
 
+## Development
+
+```sh
+make build         # compile ./bb
+make test          # go test -race ./...
+make vet           # go vet ./...
+make snapshot      # local goreleaser dry-run (produces dist/)
+```
+
+Lint (matches CI): `golangci-lint run`.
+
 ## Notes
 
 - `NO_COLOR` env var disables ANSI color output.
 - `bb upgrade` downloads `bb-<goos>-<goarch>` from the latest GitHub release.
+- `bb version` reports the build version, short commit, and build date.
 - Layout: `cmd/bb` entrypoint, `internal/{actions,api,config,util}`.
+
+## License
+
+[MIT](LICENSE).

@@ -10,10 +10,13 @@ import (
 	"github.com/margus/bb-cli/internal/util"
 )
 
-// version is set via -ldflags at build time:
-//
-//	go build -ldflags "-X main.version=v1.2.3" ./cmd/bb
-var version = "dev"
+// Build metadata. Populated via -ldflags at release time (goreleaser does
+// this automatically). Dev builds keep the placeholder values.
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
 
 var registry = map[string]actions.Action{
 	"pr":         actions.Pr{},
@@ -29,7 +32,11 @@ func main() {
 	// Surface upgrade with the current version baked in.
 	registry["upgrade"] = actions.Upgrade{CurrentVersion: version}
 
-	args := parseGlobalFlags(os.Args[1:])
+	gf, args := parseGlobalFlags(os.Args[1:])
+	util.ProjectURL = gf.Project
+	actions.PRTitle = gf.Title
+	actions.PRDescription = gf.Description
+	actions.Interactive = gf.Interactive
 
 	switch {
 	case len(args) == 0, isHelp(args[0]):
@@ -37,6 +44,8 @@ func main() {
 		return
 	case isVersion(args[0]):
 		util.O("Version: "+version, "green")
+		util.O("Commit:  "+commit, "gray")
+		util.O("Built:   "+date, "gray")
 		return
 	case isAutocomplete(args[0]):
 		printActionsForAutocomplete()
@@ -91,32 +100,43 @@ func main() {
 	}
 }
 
-func parseGlobalFlags(argv []string) []string {
+// globalFlags holds the values of the cross-action flags pulled out before
+// dispatch. Kept as a struct so parseGlobalFlags is a pure function that
+// can be unit-tested without touching package globals.
+type globalFlags struct {
+	Project     string
+	Title       string
+	Description string
+	Interactive bool
+}
+
+func parseGlobalFlags(argv []string) (globalFlags, []string) {
+	var gf globalFlags
 	out := make([]string, 0, len(argv))
 	for i := 0; i < len(argv); i++ {
 		switch argv[i] {
 		case "--project":
 			if i+1 < len(argv) {
-				util.ProjectURL = argv[i+1]
+				gf.Project = argv[i+1]
 				i++
 			}
 		case "--title":
 			if i+1 < len(argv) {
-				actions.PRTitle = argv[i+1]
+				gf.Title = argv[i+1]
 				i++
 			}
 		case "--description":
 			if i+1 < len(argv) {
-				actions.PRDescription = argv[i+1]
+				gf.Description = argv[i+1]
 				i++
 			}
 		case "-i", "--interactive":
-			actions.Interactive = true
+			gf.Interactive = true
 		default:
 			out = append(out, argv[i])
 		}
 	}
-	return out
+	return gf, out
 }
 
 func isHelp(s string) bool {
