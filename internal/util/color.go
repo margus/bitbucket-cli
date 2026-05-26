@@ -35,10 +35,7 @@ var colors = map[string]string{
 
 // disabled reports whether colors are disabled (NO_COLOR or not a TTY).
 func disabled() bool {
-	if os.Getenv("NO_COLOR") != "" {
-		return true
-	}
-	return false
+	return os.Getenv("NO_COLOR") != ""
 }
 
 func colorize(color, s string) string {

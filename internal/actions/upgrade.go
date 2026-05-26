@@ -90,13 +90,13 @@ func (u Upgrade) index() error {
 	}
 	if _, err := io.Copy(tmp, dl.Body); err != nil {
 		tmp.Close()
-		os.Remove(tmp.Name())
+		_ = os.Remove(tmp.Name())
 		return err
 	}
 	tmp.Close()
 
 	if err := os.Chmod(tmp.Name(), 0755); err != nil {
-		os.Remove(tmp.Name())
+		_ = os.Remove(tmp.Name())
 		return err
 	}
 	if err := os.Rename(tmp.Name(), binPath); err != nil {
@@ -115,7 +115,7 @@ func (u Upgrade) index() error {
 			return err2
 		}
 		out.Close()
-		os.Remove(tmp.Name())
+		_ = os.Remove(tmp.Name())
 	}
 
 	util.O("BB-CLI Updated", "green")

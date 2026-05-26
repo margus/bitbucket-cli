@@ -12,3 +12,11 @@ linters:
     - misspell
     - staticcheck
     - unused
+  settings:
+    errcheck:
+      # Closing readers/writers and httptest writes never fail in
+      # actionable ways — silencing them keeps the noise down.
+      exclude-functions:
+        - (io.Closer).Close
+        - (*os.File).Close
+        - (net/http.ResponseWriter).Write

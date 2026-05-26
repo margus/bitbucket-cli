@@ -9,8 +9,10 @@ import (
 )
 
 func TestPathXDG(t *testing.T) {
-	t.Setenv("XDG_CONFIG_HOME", "/custom/xdg")
-	if got, want := Path(), "/custom/xdg/bb/config.json"; got != want {
+	base := filepath.Join(string(filepath.Separator), "custom", "xdg")
+	t.Setenv("XDG_CONFIG_HOME", base)
+	want := filepath.Join(base, "bb", "config.json")
+	if got := Path(); got != want {
 		t.Errorf("Path() with XDG_CONFIG_HOME = %q, want %q", got, want)
 	}
 }
