@@ -91,6 +91,10 @@ release:
 brews:
   # Install with: brew install margus/tap/bb
   - name: bb
+    # Standard Homebrew tap layout — formulas under Formula/, casks under
+    # Cask/. Default would write to the repo root which works but isn't
+    # the convention.
+    directory: Formula
     repository:
       owner: margus
       name: homebrew-tap
