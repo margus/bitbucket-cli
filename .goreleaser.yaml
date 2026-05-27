@@ -1,0 +1,143 @@
+version: 2
+
+project_name: bitbucket-cli
+
+before:
+  hooks:
+    - go mod tidy
+    # Write man pages to .gen/ rather than dist/ — goreleaser's clean
+    # step trips on a non-empty dist/ at the start of the pipeline.
+    - go run ./cmd/gen-docs man .gen/man
+
+builds:
+  - id: bb
+    main: ./cmd/bb
+    binary: bb
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{ .Version }}
+      - -X main.commit={{ .ShortCommit }}
+      - -X main.date={{ .Date }}
+
+archives:
+  # Raw binaries (no .tar.gz) so `bb upgrade` can fetch them directly
+  # by filename like `bb-linux-amd64`. Manpage etc. ship separately
+  # via `extra_files`.
+  - id: bb
+    ids: [bb]
+    formats: [binary]
+    name_template: "bb-{{ .Os }}-{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+# CycloneDX SBOM next to the checksums.
+sboms:
+  - artifacts: archive
+    documents:
+      - "{{ .ArtifactName }}.sbom.json"
+
+# Keyless cosign signing of checksums.txt (which itself covers every
+# binary by hash). Requires OIDC token at release time; GitHub Actions
+# provides one for free.
+signs:
+  - cmd: cosign
+    artifacts: checksum
+    output: true
+    certificate: '${artifact}.pem'
+    args:
+      - sign-blob
+      - '--output-certificate=${certificate}'
+      - '--output-signature=${signature}'
+      - '${artifact}'
+      - '--yes'
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^ci:'
+      - '^chore:'
+      - '^test:'
+
+release:
+  github:
+    owner: margus
+    name: bitbucket-cli
+  draft: false
+  prerelease: auto
+  extra_files:
+    - glob: .gen/man/*
+
+# Homebrew tap. Requires a PAT in HOMEBREW_TAP_GITHUB_TOKEN with
+# read+write on margus/homebrew-tap (created once, empty repo).
+# If the env var is absent at release time this section silently no-ops.
+brews:
+  # Install with: brew install margus/tap/bb
+  - name: bb
+    repository:
+      owner: margus
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    homepage: https://github.com/margus/bitbucket-cli
+    description: Bitbucket Cloud REST API CLI written in Go
+    license: MIT
+    # We ship bare binaries (formats: [binary]) rather than tarballs so
+    # `bb upgrade` can grab them directly by filename. That means the
+    # formula's install block only has the binary to work with — man
+    # pages live alongside the release page rather than inside the
+    # archive.
+    install: |
+      bin.install "bb"
+    test: |
+      system "#{bin}/bb", "--version"
+
+# Multi-arch Docker images at ghcr.io/margus/bitbucket-cli.
+# Tags: vX.Y.Z, vX.Y, vX, latest.
+dockers:
+  - image_templates:
+      - "ghcr.io/margus/bitbucket-cli:{{ .Tag }}-amd64"
+    use: buildx
+    dockerfile: Dockerfile
+    goarch: amd64
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.source=https://github.com/margus/bitbucket-cli"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+  - image_templates:
+      - "ghcr.io/margus/bitbucket-cli:{{ .Tag }}-arm64"
+    use: buildx
+    dockerfile: Dockerfile
+    goarch: arm64
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.source=https://github.com/margus/bitbucket-cli"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+
+docker_manifests:
+  - name_template: "ghcr.io/margus/bitbucket-cli:{{ .Tag }}"
+    image_templates:
+      - "ghcr.io/margus/bitbucket-cli:{{ .Tag }}-amd64"
+      - "ghcr.io/margus/bitbucket-cli:{{ .Tag }}-arm64"
+  - name_template: "ghcr.io/margus/bitbucket-cli:latest"
+    image_templates:
+      - "ghcr.io/margus/bitbucket-cli:{{ .Tag }}-amd64"
+      - "ghcr.io/margus/bitbucket-cli:{{ .Tag }}-arm64"

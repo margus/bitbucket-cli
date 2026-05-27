@@ -1,0 +1,63 @@
+name: Bug report
+description: Something in bb doesn't work the way it should
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. The more specific you
+        can be the faster we can reproduce and fix it.
+
+  - type: input
+    id: version
+    attributes:
+      label: bb version
+      description: Output of `bb version` (paste all three lines).
+      placeholder: |
+        bb v0.2.0
+          commit: abc1234
+          built:  2026-05-27
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: OS / arch
+      placeholder: macOS 14 arm64 / Ubuntu 22.04 amd64 / Windows 11
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Command run
+      description: The exact command line. Redact secrets.
+      placeholder: |
+        bb --project margus/bitbucket-cli pr list
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: Output, including stderr. Re-run with `--debug` if HTTP-related and include the trace.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Workarounds you've tried, related issues, screenshots, etc.

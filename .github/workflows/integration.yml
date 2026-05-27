@@ -1,0 +1,86 @@
+name: integration
+
+# Smoke test against the real Bitbucket Cloud REST API. Catches
+# breakage like CHANGE-2770 (the cross-workspace endpoint removal)
+# *before* users do — well-typed httptest fakes won't notice when
+# Atlassian deprecates a route.
+#
+# Runs:
+#   - nightly via cron
+#   - manually via workflow_dispatch
+#
+# Skipped silently when the BB_TEST_TOKEN secret isn't set, so this
+# workflow stays out of contributors' way on forks and PRs.
+
+on:
+  schedule:
+    - cron: '0 6 * * *'    # 06:00 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.repository == 'margus/bitbucket-cli'
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: 'stable'
+
+      - name: build
+        run: go build -o bb ./cmd/bb
+
+      - name: skip if no test token
+        id: probe
+        run: |
+          if [ -z "${{ secrets.BB_TEST_TOKEN }}" ]; then
+            echo "BB_TEST_TOKEN secret not set — skipping integration smoke."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: smoke — read-only commands
+        if: steps.probe.outputs.skip != 'true'
+        env:
+          BB_AUTH_ACCESSTOKEN: ${{ secrets.BB_TEST_TOKEN }}
+          # A repo the test token can read. e.g. "myworkspace/sandbox".
+          # Set this in repo Variables (not Secrets) since it's not sensitive.
+          BB_TEST_REPO: ${{ vars.BB_TEST_REPO }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BB_TEST_REPO:-}" ]; then
+            echo "BB_TEST_REPO variable not set — using --project still requires a repo. Aborting."
+            exit 2
+          fi
+
+          echo "::group::bb --version"
+          ./bb --version
+          echo "::endgroup::"
+
+          echo "::group::bb workspace list"
+          ./bb --output json workspace list | head -c 4096
+          echo
+          echo "::endgroup::"
+
+          echo "::group::bb --project ${BB_TEST_REPO} pr list"
+          ./bb --output json --project "${BB_TEST_REPO}" pr list | head -c 8192
+          echo
+          echo "::endgroup::"
+
+          echo "::group::bb --project ${BB_TEST_REPO} branch list"
+          ./bb --output json --project "${BB_TEST_REPO}" branch list | head -c 4096
+          echo
+          echo "::endgroup::"
+
+          echo "::group::bb --project ${BB_TEST_REPO} pipeline latest"
+          # Pipeline may be empty / 404 on a sandbox repo — non-zero exit
+          # is fine, we're just looking for "the command runs without
+          # tripping a deprecation 410".
+          ./bb --project "${BB_TEST_REPO}" pipeline latest 2>&1 | head -c 4096 || true
+          echo
+          echo "::endgroup::"

@@ -1,0 +1,39 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - gosec
+    - govet
+    - ineffassign
+    - misspell
+    - staticcheck
+    - unused
+  settings:
+    errcheck:
+      # Closing readers/writers and httptest writes never fail in
+      # actionable ways — silencing them keeps the noise down.
+      exclude-functions:
+        - (io.Closer).Close
+        - (*os.File).Close
+        - (net/http.ResponseWriter).Write
+    gosec:
+      # G104 is errcheck territory and already covered above.
+      # G204 / G107 are intentional: we exec git / open browser / fetch
+      # a self-update URL, all from inputs we control.
+      # G301 / G302: 0755 is correct for an executable binary; 0755 on
+      # a docs output dir is fine.
+      # G306: tests write fixture files as 0644 on purpose.
+      excludes:
+        - G104
+        - G107
+        - G204
+        - G301
+        - G302
+        - G304  # `bb upgrade` deliberately opens the target binary path
+        - G306
+        - G703  # `gen-docs` MkdirAll on a user-supplied output dir

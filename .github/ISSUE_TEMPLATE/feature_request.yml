@@ -1,0 +1,34 @@
+name: Feature request
+description: Suggest a new command, flag, or behaviour
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the workflow or pain point, not the proposed code.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed UX
+      description: What would the new `bb …` command line look like?
+      placeholder: |
+        bb pr review 42 --approve --comment "LGTM"
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Existing commands you've tried, similar features in other CLIs (gh, glab, …).
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else

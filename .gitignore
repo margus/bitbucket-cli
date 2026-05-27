@@ -1,0 +1,7 @@
+/bb
+/dist/
+*.test
+*.out
+coverage.out
+cover.out
+/gen-docs
