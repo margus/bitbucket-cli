@@ -103,12 +103,12 @@ brews:
     description: Bitbucket Cloud REST API CLI written in Go
     license: MIT
     # We ship bare binaries (formats: [binary]) rather than tarballs so
-    # `bb upgrade` can grab them directly by filename. That means the
-    # formula's install block only has the binary to work with — man
-    # pages live alongside the release page rather than inside the
-    # archive.
+    # `bb upgrade` can grab them directly by filename like
+    # bb-darwin-arm64. Homebrew downloads that file into the staging
+    # dir with its URL basename, NOT renamed to "bb" — so the install
+    # block has to do the rename itself.
     install: |
-      bin.install "bb"
+      bin.install Dir["bb-*"].first => "bb"
     test: |
       system "#{bin}/bb", "--version"
 
