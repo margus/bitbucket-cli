@@ -8,6 +8,8 @@ once it leaves 0.x.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-08-21
+
 This is the initial public release of `bitbucket-cli` — a Bitbucket Cloud REST API CLI written in Go.
 
 ### Fixed
@@ -83,4 +85,5 @@ Every endpoint the CLI hits has been audited against Atlassian's CHANGE-2770 dep
 - Full docs under `docs/` — getting started, auth, configuration, shell completion, per-command reference, development, release process
 - `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md`
 
-[Unreleased]: https://github.com/margus/bitbucket-cli/commits/main
+[Unreleased]: https://github.com/margus/bitbucket-cli/compare/v0.1.0...main
+[0.1.0]: https://github.com/margus/bitbucket-cli/releases/tag/v0.1.0
