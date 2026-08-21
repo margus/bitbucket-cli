@@ -10,6 +10,18 @@ once it leaves 0.x.
 
 This is the initial public release of `bitbucket-cli` — a Bitbucket Cloud REST API CLI written in Go.
 
+### Fixed
+
+- `bb pr merge` always failed with a bare `400 Bad Request`. The request went out with
+  `Content-Type: application/json` but no body at all, which Bitbucket rejects; it now sends a
+  proper merge payload. This was the only bodyless POST in the CLI, so no other command was
+  affected.
+
+### Added
+
+- `bb pr merge --strategy {merge_commit,squash,fast_forward}` (default `merge_commit`) and
+  `--close-source-branch` (default off — the source branch is kept unless you ask for it).
+
 ### Commands
 
 - `bb auth {token,save,logout,show}` — manage credentials (access token or app password)

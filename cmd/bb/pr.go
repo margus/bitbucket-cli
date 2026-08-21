@@ -118,13 +118,18 @@ var prDeclineCmd = &cobra.Command{
 	},
 }
 
+var (
+	flagMergeStrategy     string
+	flagCloseSourceBranch bool
+)
+
 var prMergeCmd = &cobra.Command{
 	Use:     "merge <pr-number>",
 	Aliases: []string{"m"},
 	Short:   "Merge a pull request",
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return prMerge(args[0])
+		return prMerge(args[0], flagMergeStrategy, flagCloseSourceBranch)
 	},
 }
 
@@ -516,12 +521,21 @@ func prAddCommentInline(prNumber, file string, line int, message string) error {
 	return nil
 }
 
-func prMerge(prNumber string) error {
+func prMerge(prNumber, strategy string, closeSourceBranch bool) error {
 	c := apiClient()
 	var resp struct {
 		State string `json:"state"`
 	}
-	if err := c.JSON("POST", "/pullrequests/"+prNumber+"/merge", nil, true, &resp); err != nil {
+	// Bitbucket rejects a bodyless POST on this endpoint with a bare 400,
+	// so always send a payload even when every field is left at its default.
+	payload := map[string]any{
+		"type":                "pullrequest",
+		"close_source_branch": closeSourceBranch,
+	}
+	if strategy != "" {
+		payload["merge_strategy"] = strategy
+	}
+	if err := c.JSON("POST", "/pullrequests/"+prNumber+"/merge", payload, true, &resp); err != nil {
 		return err
 	}
 	util.O(resp.State, "green")
@@ -650,5 +664,9 @@ func init() {
 		prCommentCmd, prCommentInlineCmd,
 		prCheckoutCmd, prViewCmd,
 	)
+	prMergeCmd.Flags().StringVar(&flagMergeStrategy, "strategy", "merge_commit",
+		"merge strategy: merge_commit, squash or fast_forward")
+	prMergeCmd.Flags().BoolVar(&flagCloseSourceBranch, "close-source-branch", false,
+		"delete the source branch after a successful merge")
 	rootCmd.AddCommand(prCmd)
 }

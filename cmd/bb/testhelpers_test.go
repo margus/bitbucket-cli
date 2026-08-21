@@ -87,6 +87,9 @@ func resetRootCmd(t *testing.T) {
 	flagInteractive = false
 	flagOutput = ""
 	flagDebug = false
+	// Local flags on subcommands persist across Execute() too.
+	flagMergeStrategy = "merge_commit"
+	flagCloseSourceBranch = false
 }
 
 // runCmd drives rootCmd with the given args and captures stdout. Useful

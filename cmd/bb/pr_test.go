@@ -284,7 +284,9 @@ func TestPrDecline(t *testing.T) {
 }
 
 func TestPrMerge(t *testing.T) {
+	var body []byte
 	withTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ = io.ReadAll(r.Body)
 		w.Write([]byte(`{"state":"MERGED"}`))
 	}))
 
@@ -294,6 +296,42 @@ func TestPrMerge(t *testing.T) {
 	}
 	if !strings.Contains(out, "MERGED") {
 		t.Errorf("output missing MERGED: %s", out)
+	}
+
+	// Bitbucket answers a bodyless POST to this endpoint with a bare 400,
+	// so the payload must never go out empty — see TestPrMergeFlags for
+	// the field values.
+	if len(body) == 0 {
+		t.Fatal("merge request sent an empty body; Bitbucket rejects that with 400")
+	}
+	var got map[string]any
+	if err := json.Unmarshal(body, &got); err != nil {
+		t.Fatalf("merge body is not valid JSON (%s): %v", body, err)
+	}
+	if got["merge_strategy"] != "merge_commit" {
+		t.Errorf("merge_strategy = %v, want merge_commit", got["merge_strategy"])
+	}
+	if got["close_source_branch"] != false {
+		t.Errorf("close_source_branch = %v, want false by default", got["close_source_branch"])
+	}
+}
+
+func TestPrMergeFlags(t *testing.T) {
+	var got map[string]any
+	withTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		_ = json.Unmarshal(body, &got)
+		w.Write([]byte(`{"state":"MERGED"}`))
+	}))
+
+	if _, err := runRepoCmd(t, "pr", "merge", "7", "--strategy", "squash", "--close-source-branch"); err != nil {
+		t.Fatalf("execute: %v", err)
+	}
+	if got["merge_strategy"] != "squash" {
+		t.Errorf("merge_strategy = %v, want squash", got["merge_strategy"])
+	}
+	if got["close_source_branch"] != true {
+		t.Errorf("close_source_branch = %v, want true", got["close_source_branch"])
 	}
 }
 

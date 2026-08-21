@@ -17,7 +17,7 @@ Pull request lifecycle — create, review, comment, approve, merge.
 | `bb pr request-changes <pr-id>` | Request changes | `rc` |
 | `bb pr no-request-changes <pr-id>` | Revert a change-request review | `nrc` |
 | `bb pr decline <pr-id>` | Decline | |
-| `bb pr merge <pr-id>` | Merge | `m` |
+| `bb pr merge <pr-id>` | Merge. `--strategy` (default `merge_commit`), `--close-source-branch` | `m` |
 | `bb pr comment <pr-id> <message>` | Post a general comment | |
 | `bb pr comment-inline <pr-id> <file> <line> <message>` | Post an inline review comment | |
 | `bb pr checkout <pr-id>` | git fetch + git checkout the PR's source branch | |
@@ -54,6 +54,7 @@ $ bb pr comment-inline 42 path/to/file.go 25 "consider splitting this"
 $ bb pr checkout 42             # equivalent to: git fetch origin feature/foo && git checkout feature/foo
 $ bb pr view 42                 # opens https://bitbucket.org/.../pull-requests/42
 $ bb pr merge 42
+$ bb pr merge 42 --strategy squash --close-source-branch
 ```
 
 ## `pr create` multi-target
